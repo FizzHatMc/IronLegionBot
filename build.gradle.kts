@@ -6,8 +6,8 @@ plugins {
     id("java") // Tell Gradle this is a java project
 }
 
-group = "org.mineacademy"
-version = "1.0"
+group = "org.ironlegion"
+version = "1.2"
 
 repositories {
     mavenCentral()
@@ -31,16 +31,16 @@ tasks.test {
 
 application {
     // Tell Gradle what the main class is that it should run, this differs per project based on your packages and classes.
-    mainClass.set("org.mineacademy.Main")
+    mainClass.set("org.ironlegion.Main")
 }
 
 // We make a task "farJar", this is a task that will create a jar file that contains all the dependencies.
 val fatJar = task("fatJar", type = Jar::class) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
-        attributes["Implementation-Title"] = "MineAcademyBot"
+        attributes["Implementation-Title"] = "IronLegionBot"
         attributes["Implementation-Version"] = version
-        attributes["Main-Class"] = "org.mineacademy.Main" // Same mainclass as the application plugin setting
+        attributes["Main-Class"] = "org.ironlegion.Main" // Same mainclass as the application plugin setting
     }
     from(configurations.runtimeClasspath.get().map{ if (it.isDirectory) it else zipTree(it) })
     with(tasks.jar.get() as CopySpec)

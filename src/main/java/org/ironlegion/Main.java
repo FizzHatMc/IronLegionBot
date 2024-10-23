@@ -1,4 +1,4 @@
-package org.mineacademy;
+package org.ironlegion;
 
 import org.apache.commons.cli.*;
 
@@ -27,15 +27,16 @@ public class Main {
             // Check if the token argument was provided and has a value. If it doesn't, return null.
             String token = cmd.hasOption("token") ? cmd.getOptionValue("token") : null;
             // TOKEN ON HELP DISCORD MARCEL, CHECK THERE
-
+            System.out.println("Token: " + token);
             if (token == null) {
                 System.out.println("ERROR: No token provided, please provide a token using the -t or --token flag.");
+
                 formatter.printHelp("", options);
                 System.exit(0);
             }
 
             // If it passes through everything, it starts the bot and sends the token to our second class.
-            MineAcademyBot.selfBot = new MineAcademyBot(token);     //  <-----------------------------------------------
+            IronLegionBot.selfBot = new IronLegionBot(token);     //  <-----------------------------------------------
             //BOT START LINE (44)
         } catch (ParseException e) {
             System.out.println(e.getMessage());

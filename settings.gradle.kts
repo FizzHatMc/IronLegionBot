@@ -1,2 +1,2 @@
-rootProject.name = "MineAcadamyBot"
+rootProject.name = "IronLegionBot"
 

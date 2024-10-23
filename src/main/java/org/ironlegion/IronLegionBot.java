@@ -1,18 +1,18 @@
-package org.mineacademy;
+package org.ironlegion;
 
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
-import org.mineacademy.Listener.DiscordEventListener;
+import org.ironlegion.Listener.DiscordEventListener;
 
 import javax.security.auth.login.LoginException;
 
-public class MineAcademyBot {
+public class IronLegionBot {
     // We reference the class here, also known as the instance.
-    protected static MineAcademyBot selfBot;
+    protected static IronLegionBot selfBot;
     private ShardManager shardManager = null;
 
     // We will parse the token through and cli argument, this is a protection against leaking the token by accident. (By uploading it to git for example)
-    public MineAcademyBot(String token) {
+    public IronLegionBot(String token) {
         try {
             shardManager = buildShardManager(token);
         } catch (LoginException e) {

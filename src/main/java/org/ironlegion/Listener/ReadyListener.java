@@ -1,4 +1,4 @@
-package org.mineacademy.Listener;
+package org.ironlegion.Listener;
 
 import java.util.EventListener;
 

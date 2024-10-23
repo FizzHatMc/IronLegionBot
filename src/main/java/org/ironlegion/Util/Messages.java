@@ -1,4 +1,4 @@
-package org.mineacademy.Util;
+package org.ironlegion.Util;
 
 public class Messages {
 

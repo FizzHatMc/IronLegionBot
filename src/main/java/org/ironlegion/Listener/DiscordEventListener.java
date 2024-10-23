@@ -1,30 +1,23 @@
-package org.mineacademy.Listener;
+package org.ironlegion.Listener;
 
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.*;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import net.dv8tion.jda.api.sharding.ShardManager;
-import net.dv8tion.jda.internal.utils.PermissionUtil;
 import org.jetbrains.annotations.NotNull;
-import org.mineacademy.Util.Messages;
-import org.mineacademy.MineAcademyBot;
+import org.ironlegion.IronLegionBot;
 
 import javax.security.auth.login.LoginException;
-import java.util.EnumSet;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -34,7 +27,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DiscordEventListener extends ListenerAdapter {
-    public MineAcademyBot bot;
+    public IronLegionBot bot;
     public TextChannel textChannel;
     public boolean done = false;
 
@@ -48,7 +41,7 @@ public class DiscordEventListener extends ListenerAdapter {
      */
 
 
-    public DiscordEventListener(MineAcademyBot bot) {
+    public DiscordEventListener(IronLegionBot bot) {
         this.bot = bot;
     }
 
