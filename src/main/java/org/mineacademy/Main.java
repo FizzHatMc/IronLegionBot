@@ -26,7 +26,7 @@ public class Main {
 
             // Check if the token argument was provided and has a value. If it doesn't, return null.
             String token = cmd.hasOption("token") ? cmd.getOptionValue("token") : null;
-            token = "MTI3ODAyMjkxODM3NDQyODY5Mw.G9Q7pH.m95E8gfk-atJ2B9FblYSTl26kymIj_DjD5qZIY";             // IronLegionBot Token
+            // TOKEN ON HELP DISCORD MARCEL, CHECK THERE
 
             if (token == null) {
                 System.out.println("ERROR: No token provided, please provide a token using the -t or --token flag.");
