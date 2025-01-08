@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.*;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -36,10 +37,7 @@ public class DiscordEventListener extends ListenerAdapter {
     public long categoryGuildZoneId = 876859933835034694L;  // CATEGORY ID from Loan channel
     public long guildBridgeId = 931468999106113577L;        // Channel ID Guild-Bridge
     public long guildID = 847516508183461912L;              // ID FROM SERVER
-
-    /*
-     */
-
+    private long tkId = 283203506762940416L;                // ID From a special USER
 
     public DiscordEventListener(IronLegionBot bot) {
         this.bot = bot;
@@ -60,8 +58,22 @@ public class DiscordEventListener extends ListenerAdapter {
             commands.addCommands(Commands.slash("stoptimedmessage","Stops repeating message").setDefaultPermissions(DefaultMemberPermissions.DISABLED)).queue();
             //commands.addCommands(Commands.slash("log","Logs Loan into a File (Archiving)").setDefaultPermissions(DefaultMemberPermissions.DISABLED)).queue();
         }
-
-
+        /**
+         * guild.updateCommands().addCommands(
+         *         Commands.slash("echo", "Repeats messages back to you.")
+         *             .addOption(OptionType.STRING, "message", "The message to repeat.")
+         *             .addOption(OptionType.INTEGER, "times", "The number of times to repeat the message.")
+         *             .addOption(OptionType.BOOLEAN, "ephemeral", "Whether or not the message should be sent as an ephemeral message."),
+         *         Commands.slash("animal", "Finds a random animal")
+         *              .addOptions(
+         *                  new OptionData(OptionType.STRING, "type", "The type of animal to find")
+         *                      .addChoice("Bird", "bird")
+         *                      .addChoice("Big Cat", "bigcat")
+         *                      .addChoice("Canine", "canine")
+         *                      .addChoice("Fish", "fish")
+         *              )
+         * ).queue();
+         */
     }
 
     @Override
@@ -93,6 +105,22 @@ public class DiscordEventListener extends ListenerAdapter {
         event.replyModal(modal).queue();
     }
 
+
+    @Override
+    public void onMessageReceived(MessageReceivedEvent event) {
+        String message = event.getMessage().getContentRaw();
+
+        if(message.contains("!unmuteMe")){
+            long userID = event.getAuthor().getIdLong();
+
+            if(userID == tkId){
+                event.getChannel().sendMessage("!o g unmute mister_tk").queue();
+            }else{
+                event.getChannel().sendMessage("Nuh uh").queue();
+            }
+        }
+
+    }
 
     @Override
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
