@@ -103,6 +103,7 @@ public class DiscordEventListener extends ListenerAdapter {
                 .build();
 
         event.replyModal(modal).queue();
+        //T
     }
 
 
