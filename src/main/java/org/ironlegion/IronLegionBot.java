@@ -29,7 +29,7 @@ public class IronLegionBot {
         DefaultShardManagerBuilder builder =
                 DefaultShardManagerBuilder.createDefault(token)
                         .enableIntents(GatewayIntent.MESSAGE_CONTENT)
-                        .addEventListeners(new DiscordEventListener(this));     // <------- STARTS LISTENER CLASS
+                        .addEventListeners(new DiscordEventListener(this));
 
 
         return builder.build();

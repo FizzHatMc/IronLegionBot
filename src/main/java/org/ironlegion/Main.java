@@ -36,7 +36,7 @@ public class Main {
             }
 
             // If it passes through everything, it starts the bot and sends the token to our second class.
-            IronLegionBot.selfBot = new IronLegionBot(token);     //  <-----------------------------------------------
+            IronLegionBot.selfBot = new IronLegionBot(token);
             //BOT START LINE (44)
         } catch (ParseException e) {
             System.out.println(e.getMessage());
