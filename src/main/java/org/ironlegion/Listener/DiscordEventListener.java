@@ -1,5 +1,6 @@
 package org.ironlegion.Listener;
 
+import com.google.gson.*;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.*;
@@ -8,14 +9,24 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import net.dv8tion.jda.api.sharding.ShardManager;
+import org.ironlegion.Util.SkillLevelCalculator;
+import org.ironlegion.api.HypixelApiUtil;
 import org.jetbrains.annotations.NotNull;
 import org.ironlegion.IronLegionBot;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.math.BigDecimal;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class DiscordEventListener extends ListenerAdapter {
@@ -37,7 +48,7 @@ public class DiscordEventListener extends ListenerAdapter {
     @Override
     public void onReady(@NotNull ReadyEvent event) {
         registerCommands(bot.getJDA());
-        bot.getJDA().getShards().forEach(jda -> jda.addEventListener(new ButtonListener()));
+        bot.getJDA().getShards().forEach(jda -> jda.addEventListener(new ButtonListener(bot)));
     }
 
     private void registerCommands(@NotNull ShardManager jda) {
@@ -48,7 +59,10 @@ public class DiscordEventListener extends ListenerAdapter {
             //commands.addCommands(Commands.slash("log","Logs Loan into a File (Archiving)").setDefaultPermissions(DefaultMemberPermissions.DISABLED)).queue();
             commands.addCommands(Commands.slash("createapplymessage","Uses the current open Channel as a Apply Channel and sends the Message for the Users").setDefaultPermissions(DefaultMemberPermissions.DISABLED)).queue();
             commands.addCommands(Commands.slash("createchanneltest","test").setDefaultPermissions(DefaultMemberPermissions.DISABLED)).queue();
-
+            commands.addCommands(Commands.slash("apitest","Test API features").setDefaultPermissions(DefaultMemberPermissions.DISABLED)
+                    .addOption(OptionType.STRING,"name","IGN")
+                    .addOption(OptionType.STRING,"profile","profile"))
+                    .queue();
         }
         /**
          * guild.updateCommands().addCommands(
@@ -68,6 +82,8 @@ public class DiscordEventListener extends ListenerAdapter {
          */
     }
 
+    Map<String,String> userData = new HashMap<>();
+    
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         //if (event.getName().equals("maketimedmessage")) {
@@ -79,78 +95,70 @@ public class DiscordEventListener extends ListenerAdapter {
             case "createapplymessage":
                 sendMessage(event);
                 break;
-            case "createchanneltest":
-                test(event);
+            case "apitest":
+                userData.put("SKILL_AVERAGE", String.valueOf(calcAvg(event)));
                 break;
+
         }
-
+//  || skillName.equals("SKILL_CARPENTRY")
     }
+    
+    private double calcAvg(SlashCommandInteractionEvent event){
+        JsonObject test = HypixelApiUtil.getPlayerStats(event.getOption("name").getAsString());
+        try {
+            File file = new File("apiTest.txt");
+            file.createNewFile();
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    private void test(SlashCommandInteractionEvent event) {
-        ShardManager jda = bot.getJDA();
-        Guild g = jda.getGuildById(guildID);
-        assert g != null;
+            FileWriter fw = new FileWriter(file);
+            BufferedWriter bw = new BufferedWriter(fw);
+            JsonArray profiles = test.get("profiles").getAsJsonArray();
+            System.out.println(profiles.size());
+            JsonObject profileObj = null;
 
-        String ign = "RealKazz";
+            for (JsonElement profileElement : profiles) {
+                profileObj = profileElement.getAsJsonObject();
+                String cuteName = profileObj.get("cute_name").getAsString();
+                System.out.println("Cute Name: " + cuteName);
+                System.out.println("-----");
+                if(cuteName.equals(event.getOption("profile").getAsString())){
+                    System.out.println("Found Profile : " + profileObj.get("profile_id"));
+                    break;
+                }
+            }
+            if(profileObj==null){return 0;}
 
-        TextChannel newChannel = g.createTextChannel(ign,bot.getJDA().getCategoryById(applyCategory))
-                .addPermissionOverride(g.getPublicRole(),null, EnumSet.of(Permission.VIEW_CHANNEL))
-                .addPermissionOverride(
-                        g.getRoleById(admRole), EnumSet.of(
-                                Permission.VIEW_CHANNEL,
-                                Permission.MESSAGE_SEND,
-                                Permission.MESSAGE_HISTORY
-                        ),
-                        null)
-                .addPermissionOverride(event.getMember(), EnumSet.of(
-                                Permission.VIEW_CHANNEL,
-                                Permission.MESSAGE_SEND,
-                                Permission.MESSAGE_HISTORY
-                        ),
-                        null)
-                .complete();
+            JsonObject members = profileObj.get("members").getAsJsonObject();
+            JsonObject rk = members.get("85de5df53960428bbca47dce9766ff8f").getAsJsonObject();
+            JsonObject pd = rk.get("player_data").getAsJsonObject();
+            JsonObject exp = pd.get("experience").getAsJsonObject();
+            Map<String, String> skillsMap = new HashMap<>();
+            Map<String, Double> normalSkill = new HashMap<>();
+            for (Map.Entry<String, JsonElement> entry : exp.entrySet()) {
+                String skillName = entry.getKey();
+                BigDecimal skillValue = new BigDecimal(entry.getValue().getAsString());
+                if(skillName.equals("SKILL_RUNECRAFTING")){continue;}
+                skillsMap.put(skillName, skillValue.toPlainString());
+                normalSkill.put(skillName, SkillLevelCalculator.xpToLevel(skillValue));
 
-        newChannel.sendMessage("Test").queue();
-        event.reply("Created Channel").queue();
+            }
+
+            skillsMap.forEach((s,i)->{System.out.println(s + " | " + i);});
+            return ((normalSkill.values().stream().mapToDouble(Double::doubleValue).sum()) / normalSkill.size()) ;
+
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        return 0;
     }
 
     private void sendMessage(SlashCommandInteractionEvent event) {
-        event.getChannel().sendMessage("Apply Test, React to open a Application")
+        event.getChannel().sendMessage("Click the button below to apply for the Iron Legion [LEGION] guild! Currently, our requirements are an active profile and an agreement to follow the Hypixel and Discord rules. Thanks for checking us out!")
                 .setActionRow(
-                        Button.primary("apply","Apply!")
+                        Button.primary("applybutton","Apply!")
                 ).queue();
     }
 
-
-    public void createModel(@NotNull SlashCommandInteractionEvent event) {
-        /*
-        TextInput msg = TextInput.create("msg", "Message", TextInputStyle.SHORT)
-               .setPlaceholder("Example Message") //  setRequiredRange(10, 100)
-               .build();
-
-        TextInput time = TextInput.create("time", "Time between sends (formating important)", TextInputStyle.SHORT)
-                .setPlaceholder("4 hours, 20 minutes, 2 days")
-                .build();
-
-        Modal modal = Modal.create("tmsg", "TimedMessage")
-                .addComponents(ActionRow.of(msg), ActionRow.of(time))
-                .build();
-
-        event.replyModal(modal).queue();
-
-         */
-    }
-
-/*
-    @Override
-    public void onMessageReceived(MessageReceivedEvent event) {
-        String message = event.getMessage().getContentRaw();
-
-
-
-    }
-
- */
 
     @Override
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
@@ -161,10 +169,7 @@ public class DiscordEventListener extends ListenerAdapter {
         if(event.getModalId().equals("apply")) {
             String ign = Objects.requireNonNull(event.getValue("ign")).getAsString();
 
-
-
-
-            TextChannel newChannel = g.createTextChannel(ign,bot.getJDA().getCategoryById(applyCategory))
+            TextChannel newChannel = g.createTextChannel(ign+"-application",bot.getJDA().getCategoryById(applyCategory))
                     .addPermissionOverride(g.getPublicRole(),null, EnumSet.of(Permission.VIEW_CHANNEL))
                     .addPermissionOverride(
                             g.getRoleById(admRole), EnumSet.of(
@@ -181,7 +186,17 @@ public class DiscordEventListener extends ListenerAdapter {
                             null)
                     .complete();
 
+            MessageCreateAction action = newChannel.sendMessage(ign+" wants to join the Guild. Click Accept to invite them and give the Respective Roles! (Staff)")
+                    .addActionRow(
+                            Button.primary("accept", "Accept"),
+                            Button.danger("reject", "Reject")
+                    );
+            action.queue();
+            newChannel.sendMessage(event.getMember().getAsMention() + " this is your application for Iron Legion guild.").queue();
 
+            event.reply("Application created " + newChannel.getAsMention()).setEphemeral(true).queue();
+
+///  /level name: Mizcos profile: Apple
         }
 
 /*

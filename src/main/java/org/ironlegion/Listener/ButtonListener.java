@@ -1,5 +1,8 @@
 package org.ironlegion.Listener;
 
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -9,34 +12,61 @@ import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
+import org.ironlegion.IronLegionBot;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public class ButtonListener extends ListenerAdapter {
+    IronLegionBot bot;
+    //private long bridgeID = 931468999106113577L;
+    private long bridgeID = 1404473584105033828L;
+
+    public ButtonListener(IronLegionBot bot) {
+        this.bot = bot;
+    }
+
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
-        if (event.getComponentId().equals("apply")) {
+        Role adm = bot.getJDA().getRoleById(852410152657354772L);
+        if (event.getComponentId().equals("applybutton")) {
             createModel(event);
+        }else if (event.getComponentId().equals("accept") && (Objects.requireNonNull(event.getMember()).hasPermission(Permission.ADMINISTRATOR) || event.getMember().getRoles().contains(adm) )) {
+            acceptUser(event);
+        }else if (event.getComponentId().equals("reject") && (Objects.requireNonNull(event.getMember()).hasPermission(Permission.ADMINISTRATOR) || event.getMember().getRoles().contains(adm) )) {
+            denyUser(event);
         }
     }
 
+    private void denyUser(ButtonInteractionEvent event) {
+        String IGN = event.getChannel().getName().split("-")[0];
+        System.out.println("IGN: " + IGN + " DENIED");
+
+        TextChannel bridge = bot.getJDA().getTextChannelById(bridgeID);
+        TextChannel application = event.getChannel().asTextChannel();
+
+        application.sendMessage("You have been Denied!").queue();
+
+        event.reply("User has been Denied").setEphemeral(true).queue();
+    }
+
+    private void acceptUser(ButtonInteractionEvent event) {
+        String IGN = event.getChannel().getName().split("-")[0];
+        System.out.println("IGN: " + IGN + " ACCEPTED");
+
+        TextChannel bridge = bot.getJDA().getTextChannelById(bridgeID);
+        TextChannel application = event.getChannel().asTextChannel();
+
+        application.sendMessage("You have been accepted! You will be invited right away. If you arent online you will be have 5 Minutes to accept once you join the Game.").queue();
+
+
+        assert bridge != null;
+        bridge.sendMessage("!invite " + IGN).queue();
+        event.reply("User has been Accepted").setEphemeral(true).queue();
+
+    }
+
     private void createModel(@NotNull ButtonInteractionEvent event) {
-        /*
-        TextInput msg = TextInput.create("msg", "Message", TextInputStyle.SHORT)
-               .setPlaceholder("Example Message") //  setRequiredRange(10, 100)
-               .build();
-
-        TextInput time = TextInput.create("time", "Time between sends (formating important)", TextInputStyle.SHORT)
-                .setPlaceholder("4 hours, 20 minutes, 2 days")
-                .build();
-
-        Modal modal = Modal.create("tmsg", "TimedMessage")
-                .addComponents(ActionRow.of(msg), ActionRow.of(time))
-                .build();
-
-        event.replyModal(modal).queue();
-
-         */
-
         TextInput IGN = TextInput.create("ign", "In Game Name", TextInputStyle.SHORT)
                 .setPlaceholder("RealKazz")
                 .build();
@@ -47,7 +77,7 @@ public class ButtonListener extends ListenerAdapter {
 
 
 
-        Modal modal = Modal.create("applyModal", "Apply")
+        Modal modal = Modal.create("apply", "Apply")
                 .addComponents(ActionRow.of(IGN), ActionRow.of(PROFILE))
                 .build();
 

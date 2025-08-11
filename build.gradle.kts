@@ -16,7 +16,7 @@ repositories {
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-
+    implementation("com.google.code.gson:gson:2.10.1")
     // We add the JDA dependency here, allowing gradle to download it from maven central. Make sure to use the latest version if you can!
     implementation("net.dv8tion:JDA:5.0.0-beta.20")
 
