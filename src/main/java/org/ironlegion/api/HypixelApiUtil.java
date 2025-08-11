@@ -10,7 +10,7 @@ import java.net.URL;
 public class HypixelApiUtil {
 
 
-    private static final String HYPIXEL_API_KEY = "6f9239c2-d837-4196-95b8-8156f93de78b";
+    private static final String HYPIXEL_API_KEY = "";
     private static final String BASE_URL = "https://api.hypixel.net/v2/";
     private static final String MOJANG_BASE_URL = "https://api.mojang.com/users/profiles/minecraft/";
 
